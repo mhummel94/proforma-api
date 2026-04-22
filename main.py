@@ -47,7 +47,7 @@ def get_dropbox_client():
     refresh_token = os.getenv("DROPBOX_REFRESH_TOKEN")
 
     if not app_key or not app_secret or not refresh_token:
-        raise ValueError("Missing Dropbox credentials in .env")
+        raise ValueError("Missing Dropbox credentials in environment variables")
 
     return dropbox.Dropbox(
         oauth2_refresh_token=refresh_token,
@@ -70,14 +70,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {
-        "status": "ok",
-        "version": "debug-v2",
-        "test_value": os.getenv("TEST_VALUE"),
-        "dropbox_app_key_exists": os.getenv("DROPBOX_APP_KEY") is not None,
-        "dropbox_app_secret_exists": os.getenv("DROPBOX_APP_SECRET") is not None,
-        "dropbox_refresh_token_exists": os.getenv("DROPBOX_REFRESH_TOKEN") is not None,
-    }
+    return {"status": "ok"}
 
 
 @app.post("/populate-proforma")
