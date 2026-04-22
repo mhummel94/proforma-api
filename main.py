@@ -72,9 +72,10 @@ async def root():
 async def health():
     return {
         "status": "ok",
-        "has_app_key": bool(os.getenv("DROPBOX_APP_KEY")),
-        "has_app_secret": bool(os.getenv("DROPBOX_APP_SECRET")),
-        "has_refresh_token": bool(os.getenv("DROPBOX_REFRESH_TOKEN"))
+        "dropbox_app_key_raw": os.getenv("DROPBOX_APP_KEY"),
+        "dropbox_app_secret_raw": os.getenv("DROPBOX_APP_SECRET"),
+        "dropbox_refresh_token_raw": os.getenv("DROPBOX_REFRESH_TOKEN"),
+        "env_keys_with_dropbox": [k for k in os.environ.keys() if "DROPBOX" in k]
     }
 
 
