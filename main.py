@@ -70,7 +70,12 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "has_app_key": bool(os.getenv("DROPBOX_APP_KEY")),
+        "has_app_secret": bool(os.getenv("DROPBOX_APP_SECRET")),
+        "has_refresh_token": bool(os.getenv("DROPBOX_REFRESH_TOKEN"))
+    }
 
 
 @app.post("/populate-proforma")
