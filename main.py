@@ -32,6 +32,7 @@ class Comp(BaseModel):
     year_built: int | None = None
     sold_date: str | None = None
     sold_price: int | float | None = None
+    notes: str | None = None
     redfin_url: str | None = None
 
 
@@ -115,6 +116,7 @@ async def populate_proforma(data: ProformaRequest):
             )
             sheet[f"E{row}"] = comp.sold_date
             sheet[f"F{row}"] = comp.sold_price
+            sheet[f"G{row}"] = comp.notes
             sheet[f"H{row}"] = comp.redfin_url
 
         # Save to memory
