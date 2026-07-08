@@ -1,3 +1,14 @@
+import socket
+import urllib3.util.connection
+
+# Force IPv4 — fix for Railway IPv6 routing failures to Dropbox
+urllib3.util.connection.HAS_IPV6 = False
+
+def _forced_ipv4():
+    return socket.AF_INET
+
+urllib3.util.connection.allowed_gai_family = _forced_ipv4
+
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from typing import List
