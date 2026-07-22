@@ -115,6 +115,9 @@ async def populate_proforma(data: ProformaRequest):
 
         # Comps (rows 23–29)
         start_row = 23
+        # Notes now live in a separate block, B34-B39 (6 rows)
+        notes_start_row = 34
+        notes_row_count = 6
 
         for i, comp in enumerate(data.comps[:7]):
             row = start_row + i
@@ -127,8 +130,11 @@ async def populate_proforma(data: ProformaRequest):
             )
             sheet[f"E{row}"] = comp.sold_date
             sheet[f"F{row}"] = comp.sold_price
-            sheet[f"G{row}"] = comp.notes
             sheet[f"H{row}"] = comp.redfin_url
+
+            if i < notes_row_count:
+                notes_row = notes_start_row + i
+                sheet[f"B{notes_row}"] = comp.notes
 
         # Save to memory
         output = BytesIO()
