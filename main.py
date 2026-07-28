@@ -51,6 +51,7 @@ class ProformaRequest(BaseModel):
     dropbox_path: str
     subject_property: SubjectProperty
     comps: List[Comp] = Field(default_factory=list)
+    pending_comps: List[Comp] = Field(default_factory=list)
 
 
 def get_dropbox_client():
@@ -113,13 +114,17 @@ async def populate_proforma(data: ProformaRequest):
         )
         sheet["B17"] = data.subject_property.redfin_url
 
-        # Comps (rows 23–29)
+        # Comps (rows 23-28) — capped at 6 to reserve rows 29-30 for the
+        # two best pending comps (see below). Previously this ran 23-29 (7
+        # rows); dropped to 6 so pending comps have dedicated rows and never
+        # collide with a regular comp.
         start_row = 23
+        max_regular_comps = 6
         # Notes now live in a separate block, B34-B39 (6 rows)
         notes_start_row = 34
         notes_row_count = 6
 
-        for i, comp in enumerate(data.comps[:7]):
+        for i, comp in enumerate(data.comps[:max_regular_comps]):
             row = start_row + i
             sheet[f"B{row}"] = comp.address
             sheet[f"C{row}"] = comp.sqft
@@ -135,6 +140,29 @@ async def populate_proforma(data: ProformaRequest):
             if i < notes_row_count:
                 notes_row = notes_start_row + i
                 sheet[f"B{notes_row}"] = comp.notes
+
+        # Pending comps (rows 29-30) — best 2 pending comps, mapped the same
+        # way as regular comps. Notes go to B40/B41, NOT the shared B34-39
+        # notes block used by regular comps.
+        pending_start_row = 29
+        pending_notes_start_row = 40
+        max_pending_comps = 2
+
+        for i, comp in enumerate(data.pending_comps[:max_pending_comps]):
+            row = pending_start_row + i
+            sheet[f"B{row}"] = comp.address
+            sheet[f"C{row}"] = comp.sqft
+            sheet[f"D{row}"] = format_bed_bath_year(
+                comp.beds,
+                comp.baths,
+                comp.year_built
+            )
+            sheet[f"E{row}"] = comp.sold_date
+            sheet[f"F{row}"] = comp.sold_price
+            sheet[f"H{row}"] = comp.redfin_url
+
+            notes_row = pending_notes_start_row + i
+            sheet[f"B{notes_row}"] = comp.notes
 
         # Save to memory
         output = BytesIO()
